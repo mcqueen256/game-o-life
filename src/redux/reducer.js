@@ -4,6 +4,7 @@ const initState = {
     reset: false,
     speed: 'pause',
     cells: [],
+    gen: {},
     width: 0,
     height: 0,
     pixel_width: 0,
@@ -12,7 +13,6 @@ const initState = {
 
 const ALIVE = true;
 const DEAD = false;
-
 
 
 
@@ -27,6 +27,13 @@ const reducer = (state = initState, action) => {
             const px_size = action.payload.pixel_size;
             const num_vertical_cells = Math.floor(scale*px_h/(px_size+1));
             const num_horizontal_cells = Math.floor(scale*px_w/(px_size+1));
+            let gen = {};
+            for (let x = 0; x < num_horizontal_cells; x++) {
+                gen[x] = {}
+                for (let y = 0; y < num_vertical_cells; y++) {
+                    gen[x][y] = DEAD;
+                }
+            }
             const cells = new Array(num_vertical_cells * num_horizontal_cells);
             cells.fill(DEAD);
             console.groupEnd();
@@ -36,7 +43,8 @@ const reducer = (state = initState, action) => {
                 pixel_height: action.payload.pixel_height,
                 height: num_vertical_cells,
                 width: num_horizontal_cells,
-                cells
+                cells,
+                gen
             }
         }
         case actionTypes.RESET_RANDOM: {
@@ -63,25 +71,40 @@ const reducer = (state = initState, action) => {
         }
         case actionTypes.TICK: {
             console.log(actionTypes.TICK);
-            const livingNeighbors = (i) => {
-                let count = 0;
-                for (let x = 0; x < 3; x++) {
-                    for (let y = 0; y < 3; y++) {
-                        const index = state.width * (y%state.height) + (x%state.width);
-                        if (state.cells[index] === ALIVE) {
-                            count++;
+
+            let next_gen = {};
+            for (let x = 0; x < state.width; x++) {
+                for (let y = 0; y < state.height; y++) {
+                    //count living neighbors
+                    let living_neighbors = 0;
+                    for (let dx = 0; dx < 3; dx++) {
+                        for (let dy = 0; dy < 3; dy++) {
+                            if (dx === 1 && dy === 1) continue;
+                            const nx = (x + dx) % state.width;
+                            const ny = (y + dy) % state.height;
+                            if (state.gen[nx][ny] === ALIVE) living_neighbors++;
+                        }
+                    }
+                    // calculate next gen status
+                    if (state.gen[x][y] === ALIVE) {
+                        if (living_neighbors === 2 || living_neighbors === 3) {
+                            next_gen[x][y] = ALIVE;
+                        }
+                        else {
+                            next_gen[x][y] = DEAD;
                         }
                     }
                 }
-                return count;
-            };
+            }
+
+
             let cells = new Array(state.cells.length).fill(DEAD);
             for(let i = 0; i < state.cells.length; i++) {
                 //count the neighbors
                 let living_neighbors = 0;
                 for (let x = 0; x < 3; x++) {
                     for (let y = 0; y < 3; y++) {
-                        if (x == 1 && y == 1) continue;
+                        if (x === 1 && y === 1) continue;
                         const dy = Math.floor(i/state.width)
                         const index = state.width * ((dy+y)%state.height) + ((i+x)%state.width);
                         if (state.cells[index] === ALIVE) {

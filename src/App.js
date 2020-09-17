@@ -1,20 +1,37 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import {Provider} from 'react-redux';
+import React, { useEffect } from 'react';
 import './App.css';
 import Grid from './components/grid.js';
 import Controls from './components/controls.js';
-import store from './redux/store.js';
+import { connect } from 'react-redux';
+import { tick } from "./redux/actions";
 
-function App() {
+const App = (props) => {
+  const { tick } = props;
+
+  useEffect(()=> {
+      console.group("useEffect")
+      console.log("Setting interval");
+      const interval = setInterval(()=>{
+          tick();
+      }, 1000);
+      console.log({interval});
+      console.groupEnd();
+  }, []);
+
   return (
-    <Provider store={store}>
       <div className="App">
         <Controls />
         <Grid />
       </div>
-    </Provider>
   );
 }
 
-export default App;
+const mapStateToProps = state => {
+  return state;
+}
+
+const mapDispatchToProps = dispatch => ({
+  tick: () => dispatch(tick()),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
