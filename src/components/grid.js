@@ -1,7 +1,7 @@
 import React, { useRef, useLayoutEffect, useEffect, useState } from "react";
 import { connect } from 'react-redux';
 
-import { initGrid } from "../redux/actions";
+import { initGrid, tick } from "../redux/actions";
 
 const ALIVE = true;
 const DEAD = false;
@@ -23,6 +23,7 @@ const Grid = props => {
     console.group("Grid");
     const {
         initGrid,
+        tick,
         width,
         height,
         cells,
@@ -51,6 +52,15 @@ const Grid = props => {
                 initGrid(pixel_size, targetRef.current.offsetWidth, targetRef.current.offsetHeight);
             }
         }
+        console.groupEnd();
+    }, []);
+
+    useEffect(()=> {
+        console.group("useEffect")
+        console.log("Setting interval");
+        const interval = setInterval(()=>{
+            tick();
+        }, 1000);
         console.groupEnd();
     }, []);
 
@@ -92,7 +102,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
     initGrid: (pixel_size, pixel_width, pixel_height) => {
         dispatch(initGrid(pixel_size, pixel_width, pixel_height));
-    }
+    },
+    tick: () => dispatch(tick()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Grid);

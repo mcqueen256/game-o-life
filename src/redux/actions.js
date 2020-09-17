@@ -1,4 +1,4 @@
-import {INIT_GRID, RESET_RANDOM, TICK_GRID, INC, DEC } from './actionTypes'
+import {INIT_GRID, RESET_RANDOM, TICK, PLAY, PAUSE } from './actionTypes'
 
 export const initGrid = (pixel_size, pixel_width, pixel_height) => ({
     type: INIT_GRID,
@@ -9,14 +9,14 @@ export const resetRandom = () => ({
     type: RESET_RANDOM
 });
 
-export const tickGrid = () => ({
-    type: TICK_GRID
+export const tick = () => ({
+    type: TICK
+})
+
+export const play = () => ({
+    type: PLAY
 });
 
-export const inc = () => ({
-    type: INC
-});
-
-export const dec = () => ({
-    type: DEC
+export const pause = () => ({
+    type: PAUSE
 });
